@@ -12,29 +12,12 @@ ASceneCapManager::ASceneCapManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	//bAllowTickBeforeBeginPlay = false;
-	
 }
 
 // Called when the game starts or when spawned
 void ASceneCapManager::BeginPlay()
 {
-	Super::BeginPlay();
-	/*TArray<UActorComponent*> a;
-	a=Vehicle->GetComponentsByClass(UCaptureComponent::StaticClass());*/
-	//Camera.Append((Vehicle->GetComponentsByClass(UCaptureComponent::StaticClass())));
-	/*Camera.Empty();
-	Camera.Append(a);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"),a.Num()));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), Camera.Num()));*/
-	/*if (a.Num() > 0)
-	{
-		for (int i = 0; i < a.Num(); i++)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d%s"), i,a[i].));
-		}
-	}*/
-	
+	Super::BeginPlay();	
 }
 
 // Called every frame
@@ -55,13 +38,11 @@ void ASceneCapManager::Tick(float DeltaTime)
 	}
 	if (PointsToScanWithOneLaser > PointsperSecond * 0.05 / Channel)
 		PointsToScanWithOneLaser = int(PointsperSecond * 0.05 / Channel);
+	
 	const float AnglePerTick = RotationFrequency * 360.0f * DeltaTime;
-
-	//float AnglePerTick = 30;
 	LastHorAngle = CurrentHorAngle;
 	CurrentHorAngle = CurrentHorAngle + AnglePerTick;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), AnglePerTick));
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%f"), LastHorAngle));
 	
 	/*views needed to record in this frame*/
 	int NumOfActiveView = floor(CurrentHorAngle/90) - floor(LastHorAngle / 90) + 1;	
@@ -76,8 +57,6 @@ void ASceneCapManager::Tick(float DeltaTime)
 	//TArray<UTextureRenderTarget2D*> ActiveViews;
 	int StartViewID = floor(LastHorAngle / 90);
 	int EndViewID =floor(CurrentHorAngle / 90);
-	
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), StartViewID));
 
 	FString a[] = { TEXT("F"),TEXT("R"),TEXT("B"),TEXT("L") };
 
@@ -112,9 +91,6 @@ void ASceneCapManager::Tick(float DeltaTime)
 				}
 				start = floor(0.5*width - tan(45 * PI / 180 - startangle)*width*0.5);				
 				end = floor(0.5*width - tan(45 * PI / 180 - endangle)*width*0.5);
-				
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%f"), startangle));
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), start));
 			}
 			else if (j == EndViewID && NumOfActiveView > 1)
 			{
@@ -127,9 +103,6 @@ void ASceneCapManager::Tick(float DeltaTime)
 				}
 				start = 0;
 				end = floor(0.5*width - tan(45 * PI / 180 - endangle)*width*0.5);
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%f"), LastHorAngle));
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%f"), fmod(LastHorAngle, 90)));
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), start));
 			}
 			else if (j == StartViewID && NumOfActiveView > 1)
 			{
@@ -151,16 +124,12 @@ void ASceneCapManager::Tick(float DeltaTime)
 			//Read Pixels
 			FTextureRenderTargetResource* RenderTargetResource = Views[j]->GameThread_GetRenderTargetResource();
 			RenderTargetResource->ReadFloat16Pixels(FloatImage);
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("FloatImage %d"), FloatImage.Num()));
 			FFloat16Color* FloatRGBA = &FloatImage[0];
 
 			/*output data of this frame*/
 			if (FloatRGBA != NULL)
 			{
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), j));
 				Output(name, FloatRGBA, start, end, error, MaxFileSize);
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"),FloatImage.Num()));
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("FloatRGBA != NULL")));
 			}
 			else
 			{
@@ -175,7 +144,6 @@ void ASceneCapManager::Tick(float DeltaTime)
 		{
 			FloatImage.Empty();
 
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), j));
 			char name[2048];
 			if (*path != NULL)
 			{
@@ -189,7 +157,6 @@ void ASceneCapManager::Tick(float DeltaTime)
 			}
 
 			/*Calculate Start and end for this view*/
-			
 			if (j == EndViewID && NumOfActiveView > 1)
 			{
 				//last view
@@ -201,7 +168,6 @@ void ASceneCapManager::Tick(float DeltaTime)
 				}
 				start = 0;
 				end = floor(0.5*width - tan(45 * PI / 180 - endangle)*width*0.5);
-				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("%d"), start));
 			}
 			else if (j == StartViewID && NumOfActiveView > 1)
 			{
